@@ -4,7 +4,7 @@ import random
 import bottle
 
 from api import ping_response, start_response, move_response, end_response
-
+import app.a_star
 
 @bottle.route('/')
 def index():
@@ -59,6 +59,11 @@ def move():
             snake AI must choose a direction to move in.
     """
     print(json.dumps(data))
+    my_snake_head = Position(data.you.body[0].x, data.you.body[0].y)
+    food = Position(data.board.food[0].x, data.board.food[0].y)
+    astar = AStarSearch(data.board.height, my_snake_head, food)
+
+    print(astar)
 
     directions = ['up', 'down', 'left', 'right']
     direction = random.choice(directions)
