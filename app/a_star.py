@@ -1,4 +1,4 @@
-from app.rb_tree import RedBlackTree
+from rb_tree import RedBlackTree
 
 class Position:
 
@@ -7,9 +7,9 @@ class Position:
         self.y = y
 
     def is_valid(self, grid_size):
-        if (self.x < 0 || self.x >= grid_size):
+        if (self.x < 0 or self.x >= grid_size):
             return False
-        if (self.y < 0 || self.y >= grid_size):
+        if (self.y < 0 or self.y >= grid_size):
             return False
         return True
 
@@ -17,11 +17,14 @@ class GridPositionInfo:
 
     def __init__(self, current, source, goal):
         self.position = current
-        self.g = self.get_manhattan_distance(self.position, source.position)
-        self.h = self.get_manhattan_distance(self.position, goal.position)
+        self.g = self.get_manhattan_distance(current, source)
+        self.h = self.get_manhattan_distance(current, goal)
         self.f = self.g + self.h
 
-    def get_manhattan_distance(a, b):
+    def to_string(self):
+        return 'position: x=' + str(self.position.x) + ' y=' + str(self.position.y) + ', g: ' + str(self.g) + ', h: ' + str(self.h) + ', f: ' + str(self.f)
+
+    def get_manhattan_distance(self, a, b):
         return abs(a.x - b.x) + abs(a.y - b.y)
 
 class AStarSearch:
@@ -34,14 +37,19 @@ class AStarSearch:
         first = GridPositionInfo(source, source, goal)
         first.f = 0
         self.open.add(first)
+        self.iterate_through_open_list()
 
-    def iterate_through_open_list():
+    def iterate_through_open_list(self):
         while(self.open.count > 0):
-            # find node in open list with lowest f value & pop it off open list
+            node = self.find_lowest_f_in_open_list()
+            print('node with lowest f:')
+            print(node.value.to_string())
             # generate the 8 successors of the node
-            successors = generate_successors(node)
+            successors = self.generate_successors(node)
             while(successors.len > 0):
                 successor = successors.pop()
+                print('successor:')
+                print(successor.value.to_string())
                 if (successor.position == self.goal.position):
                     return successor
                 elif (is_cheaper_node_in_open_list(successor)):
@@ -58,20 +66,32 @@ class AStarSearch:
         # has not been reached
         print('Error: cannot reach ' + self.goal)
 
+    def find_lowest_f_in_open_list(self):
+        f = 0
+        while (self.open.find_node_with_f(f) == None):
+            f = f + 1
+        return self.open.find_node_with_f(f)
+
     # returns boolean value indicating if a node with the same position as successor
     # already exists in the open R-B tree AND has a lower f value than successor
     def is_cheaper_node_in_open_list(successor):
-        print(self.open.contains(successor.position))
+        # TODO not sure how this will work...
+        print(successor.position.x, successor.position.y)
+        print('\n\n\n')
+        print(self.open)
+        print(str(self.open.contains(successor.position)))
+        return
 
     # returns boolean value indicating if a node with the same position as successor
     # already exists in the closed list AND has a lower f value than successor
     def is_cheaper_node_in_closed_list(successor): 
         if (successor.position in self.closed.keys()):
             node = self.closed[successor.position]
-            if (node.f < successor.f) return True
+            if (node.f < successor.f):
+                return True
         return False      
 
-    def generate_successors(parent):
+    def generate_successors(self, parent):
         successors_list = []
         """
         +---+---+---+

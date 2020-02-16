@@ -375,7 +375,7 @@ class RedBlackTree:
         """
         parent = node.parent
         value = node.value
-        if (parent is None  # what the fuck? (should not happen)
+        if (parent is None  # what the? (should not happen)
            or parent.parent is None  # parent is the root
            or (node.color != RED or parent.color != RED)):  # no need to rebalance
             return
@@ -465,13 +465,13 @@ class RedBlackTree:
             """
             Return the appropriate parent node for our new node as well as the side it should be on
             """
-            if value == parent.value:
+            if value.position == parent.value.position:
                 return None, None
-            elif parent.value < value:
+            elif parent.value.f < value.f:
                 if parent.right.color == NIL:  # no more to go
                     return parent, 'R'
                 return inner_find(parent.right)
-            elif value < parent.value:
+            elif value.f < parent.value.f:
                 if parent.left.color == NIL:  # no more to go
                     return parent, 'L'
                 return inner_find(parent.left)
@@ -491,6 +491,20 @@ class RedBlackTree:
 
         found_node = inner_find(self.root)
         return found_node 
+
+    def find_node_with_f(self, f_value):
+        def inner_find(root):
+            if root is None or root == self.NIL_LEAF:
+                return None
+            if f_value > root.value.f:
+                return inner_find(root.right)
+            elif f_value < root.value.f:
+                return inner_find(root.left)
+            else:
+                return root
+
+        found_node = inner_find(self.root)
+        return found_node
 
     def _find_in_order_successor(self, node):
         right_node = node.right
