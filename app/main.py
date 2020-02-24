@@ -4,7 +4,7 @@ import random
 import bottle
 
 from api import ping_response, start_response, move_response, end_response
-# from a_star import Position, GridPositionInfo, AStarSearch
+from a_star import Position, GridPositionInfo#, AStarSearch
 
 class FloodNode:
     def __init__(self, position, colour='white'):
