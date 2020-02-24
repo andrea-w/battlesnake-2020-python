@@ -360,7 +360,7 @@ def move():
         direction = 'left' if biggest_space == 0 else 'right' if biggest_space == 1 else 'up' if biggest_space == 2 else 'down'
 
     attack_dir = check_for_potential_kill(my_snake_head)
-    if (attack_dir is not None):
+    if (attack_dir is not None and attack_dir in possible_directions):
         direction = attack_dir
     #print(astar)
 
