@@ -12,7 +12,7 @@ class FloodNode:
         self.colour = colour
 
     # def to_string(self):
-        # print('(' + str(self.position.x) + ',' + str(self.position.y) + ') - ' + self.colour)
+    #     print('(' + str(self.position.x) + ',' + str(self.position.y) + ') - ' + self.colour)
 
 class FloodGrid:
     def __init__(self, height, width):
@@ -120,6 +120,37 @@ def get_direction_to_goal(current, goal):
         return 'down'
     elif (current.y > goal.y):
         return 'up'
+
+# checks to see if the head of another snake is within 2 moves of my_snake_head
+# if so, determines if opponent snake is bigger/smaller than me
+# if opponent snake is smaller, will try to cause a head-on collision, thus killing opponent
+def check_for_potential_kill(my_snake_head):
+    global data 
+    for snake in data['board']['snakes']:
+        # we don't have to worry about our own head
+        if snake['id'] == data['you']['id']:
+            continue
+        else:
+            if (opponent_snake_head_nearby(my_snake_head, snake)):
+                if (i_am_bigger_than_opponent(snake)):
+                    return get_direction_to_goal(my_snake_head, Position(snake['body'][0]['x'], snake['body'][0]['y']))
+    return
+
+def opponent_snake_head_nearby(my_snake_head, snake):
+    if (get_manhattan_distance_between(my_snake_head, Position(snake['body'][0]['x'], snake['body'][0]['y'])) <= 2):
+        return True
+    else:
+        return False
+
+def get_manhattan_distance_between(a,b):
+    return abs(a.x - b.x) + abs(a.y - b.y)
+
+def i_am_bigger_than_opponent(snake):
+    global data
+    if ((1 + len(snake['body'])) < len(data['you']['body'])):
+        return True
+    else:
+        return False
 
 def check_for_obstacle(data, position):
     walls = {
@@ -270,12 +301,7 @@ def start():
     """
     #print(json.dumps(data))
 
-    return start_response(
-        {
-        "color": "#33BEFF",
-        "headType": "bwc-scarf",
-        "tailType": "bwc-bonhomme"
-        })
+    return start_response("#33BEFF", "bwc-scarf", "bwc-ice-skate")
 
 
 @bottle.post('/move')
@@ -317,10 +343,14 @@ def move():
     direction = get_direction_to_goal(my_snake_head, target_food)
 
     if (direction not in possible_directions):
-        flood_fill_left(FloodNode(get_position_to_left(my_snake_head)), 'white', 'yellow')
-        flood_fill_right(FloodNode(get_position_to_right(my_snake_head)), 'white', 'red')
-        flood_fill_up(FloodNode(get_position_above(my_snake_head)), 'white', 'blue')
-        flood_fill_below(FloodNode(get_position_below(my_snake_head)), 'white', 'green')
+        if ('left' in possible_directions):
+            flood_fill_left(FloodNode(get_position_to_left(my_snake_head)), 'white', 'yellow')
+        if ('right' in possible_directions):
+            flood_fill_right(FloodNode(get_position_to_right(my_snake_head)), 'white', 'red')
+        if ('up' in possible_directions):
+            flood_fill_up(FloodNode(get_position_above(my_snake_head)), 'white', 'blue')
+        if ('down' in possible_directions):
+            flood_fill_below(FloodNode(get_position_below(my_snake_head)), 'white', 'green')
 
         flood_fill_values = [floodGrid.count_yellow(), 
                              floodGrid.count_red(),
@@ -329,6 +359,9 @@ def move():
         biggest_space = flood_fill_values.index(max(flood_fill_values))
         direction = 'left' if biggest_space == 0 else 'right' if biggest_space == 1 else 'up' if biggest_space == 2 else 'down'
 
+    attack_dir = check_for_potential_kill(my_snake_head)
+    if (attack_dir is not None):
+        direction = attack_dir
     #print(astar)
 
     return move_response(direction)
@@ -338,9 +371,9 @@ def move():
 def end():
     global floodGrid
     data = bottle.request.json
-    end_grid_file = open("Death_grid.txt", "w")
-    end_grid_file.write(floodGrid.to_string())
-    end_grid_file.close()
+    # end_grid_file = open("Death_grid.txt", "w")
+    # end_grid_file.write(floodGrid.to_string())
+    # end_grid_file.close()
     """
     TODO: If your snake AI was stateful,
         clean up any stateful objects here.
