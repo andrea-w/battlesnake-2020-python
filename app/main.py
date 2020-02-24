@@ -27,21 +27,21 @@ class FloodGrid:
         #     print('index out of range at y=' + str(node.position.y))
         self.grid[node.position.x][node.position.y] = node
 
-    def print_string(self):
-        for i in range(self.width):
-            for j in range(self.height):
-                node = self.grid[j][i]
-                print(node.colour, end=' ')
-            print()
+    # def print_string(self):
+    #     for i in range(self.width):
+    #         for j in range(self.height):
+    #             node = self.grid[j][i]
+    #             print(node.colour, end=' ')
+    #         print()
 
-    def to_string(self):
-        out_str = ''
-        for i in range(self.width):
-            for j in range(self.height):
-                node = self.grid[j][i]
-                out_str = out_str + node.colour + ' '
-            out_str = out_str + '\n'
-        return out_str
+    # def to_string(self):
+    #     out_str = ''
+    #     for i in range(self.width):
+    #         for j in range(self.height):
+    #             node = self.grid[j][i]
+    #             out_str = out_str + node.colour + ' '
+    #         out_str = out_str + '\n'
+    #     return out_str
 
     def get_node_at(self, x, y):
         if (x >= 0 and x < self.width and y >= 0 and y < self.height):
