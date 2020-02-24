@@ -270,9 +270,12 @@ def start():
     """
     #print(json.dumps(data))
 
-    color = "#00FF00"
-
-    return start_response(color)
+    return start_response(
+        {
+        "color": "#33BEFF",
+        "headType": "bwc-scarf",
+        "tailType": "bwc-bonhomme"
+        })
 
 
 @bottle.post('/move')
