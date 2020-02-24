@@ -1,4 +1,4 @@
-from rb_tree import RedBlackTree
+#from rb_tree import RedBlackTree
 
 class Position:
 
@@ -21,8 +21,8 @@ class GridPositionInfo:
         self.h = self.get_manhattan_distance(current, goal)
         self.f = self.g + self.h
 
-    def to_string(self):
-        return 'position: x=' + str(self.position.x) + ' y=' + str(self.position.y) + ', g: ' + str(self.g) + ', h: ' + str(self.h) + ', f: ' + str(self.f)
+    # def to_string(self):
+    #     return 'position: x=' + str(self.position.x) + ' y=' + str(self.position.y) + ', g: ' + str(self.g) + ', h: ' + str(self.h) + ', f: ' + str(self.f)
 
     def get_manhattan_distance(self, a, b):
         return abs(a.x - b.x) + abs(a.y - b.y)
