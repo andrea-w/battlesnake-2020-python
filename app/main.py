@@ -11,7 +11,7 @@ class FloodNode:
         self.position = position
         self.colour = colour
 
-    def to_string(self):
+    # def to_string(self):
         # print('(' + str(self.position.x) + ',' + str(self.position.y) + ') - ' + self.colour)
 
 class FloodGrid:
