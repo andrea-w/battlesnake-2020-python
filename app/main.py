@@ -11,8 +11,8 @@ class FloodNode:
         self.position = position
         self.colour = colour
 
-    # def to_string(self):
-    #     print('(' + str(self.position.x) + ',' + str(self.position.y) + ') - ' + self.colour)
+    def to_string(self):
+        print('(' + str(self.position.x) + ',' + str(self.position.y) + ') - ' + self.colour)
 
 class FloodGrid:
     def __init__(self, height, width):
@@ -21,33 +21,33 @@ class FloodGrid:
         self.grid = [[FloodNode(Position(x,y)) for x in range(width)] for y in range(height)]
 
     def insert(self, node):
-        # if (node.position.x < 0 or node.position.x > self.width):
-        #     print('index out of range at x=' + str(node.position.x))
-        # if (node.position.y < 0 or node.position.y > self.height):
-        #     print('index out of range at y=' + str(node.position.y))
+        if (node.position.x < 0 or node.position.x > self.width):
+            print('index out of range at x=' + str(node.position.x))
+        if (node.position.y < 0 or node.position.y > self.height):
+            print('index out of range at y=' + str(node.position.y))
         self.grid[node.position.x][node.position.y] = node
 
-    # def print_string(self):
-    #     for i in range(self.width):
-    #         for j in range(self.height):
-    #             node = self.grid[j][i]
-    #             print(node.colour, end=' ')
-    #         print()
+    def print_string(self):
+        for i in range(self.width):
+            for j in range(self.height):
+                node = self.grid[j][i]
+                print(node.colour, end=' ')
+            print()
 
-    # def to_string(self):
-    #     out_str = ''
-    #     for i in range(self.width):
-    #         for j in range(self.height):
-    #             node = self.grid[j][i]
-    #             out_str = out_str + node.colour + ' '
-    #         out_str = out_str + '\n'
-    #     return out_str
+    def to_string(self):
+        out_str = ''
+        for i in range(self.width):
+            for j in range(self.height):
+                node = self.grid[j][i]
+                out_str = out_str + node.colour + ' '
+            out_str = out_str + '\n'
+        return out_str
 
     def get_node_at(self, x, y):
         if (x >= 0 and x < self.width and y >= 0 and y < self.height):
             return self.grid[y][x]
         else:
-            # print('grid index out of range for ' + str(x) + ',' + str(y))
+            print('grid index out of range for ' + str(x) + ',' + str(y))
             return
 
     def count_red(self):
@@ -178,8 +178,10 @@ def flood_fill_left(node, target_colour, replace_colour):
     if (check_for_obstacle(data, node.position)):
         node.colour = 'black'
         floodGrid.insert(node)
-        # print('found an obstacle')
+        print('found an obstacle')
         return
+    else:
+        floodGrid.insert(node)
     if (target_colour == replace_colour):
         return  
     if (floodGrid.get_node_at(node.position.x, node.position.y).colour != target_colour):
@@ -187,9 +189,10 @@ def flood_fill_left(node, target_colour, replace_colour):
         return
     if (not check_for_obstacle(data, get_position_to_left(node.position))):
         westNode = FloodNode(get_position_to_left(node.position), 'yellow')
-        # print('westNode: ')
-        # westNode.to_string()
+        print('westNode: ')
+        westNode.to_string()
         floodGrid.insert(westNode)
+        # floodGrid.print_string()
         flood_fill_left(westNode, target_colour, replace_colour)
     return
 
@@ -201,8 +204,10 @@ def flood_fill_right(node, target_colour, replace_colour):
     if (check_for_obstacle(data, node.position)):
         node.colour = 'black'
         floodGrid.insert(node)
-        # print('found an obstacle')
+        print('found an obstacle')
         return
+    else:
+        floodGrid.insert(node)
     if (target_colour == replace_colour):
         return  
     if (floodGrid.get_node_at(node.position.x, node.position.y).colour != target_colour):
@@ -210,9 +215,10 @@ def flood_fill_right(node, target_colour, replace_colour):
         return
     if (not check_for_obstacle(data, get_position_to_right(node.position))):
         eastNode = FloodNode(get_position_to_right(node.position), 'red')
-        # print('eastNode:')
-        # eastNode.to_string()
+        print('eastNode:')
+        eastNode.to_string()
         floodGrid.insert(eastNode)
+        # floodGrid.print_string()
         flood_fill_right(eastNode, target_colour, replace_colour)
     return
 
@@ -224,8 +230,10 @@ def flood_fill_up(node, target_colour, replace_colour):
     if (check_for_obstacle(data, node.position)):
         node.colour = 'black'
         floodGrid.insert(node)
-        # print('found an obstacle')
+        print('found an obstacle')
         return
+    else:
+        floodGrid.insert(node)
     if (target_colour == replace_colour):
         return  
     if (floodGrid.get_node_at(node.position.x, node.position.y).colour != target_colour):
@@ -233,9 +241,10 @@ def flood_fill_up(node, target_colour, replace_colour):
         return
     if (not check_for_obstacle(data, get_position_above(node.position))):
         northNode = FloodNode(get_position_above(node.position), 'blue')
-        # print('northNode:')
-        # northNode.to_string()
+        print('northNode:')
+        northNode.to_string()
         floodGrid.insert(northNode)
+        # floodGrid.print_string()
         flood_fill_up(northNode, target_colour, replace_colour)
     return
 
@@ -247,8 +256,10 @@ def flood_fill_below(node, target_colour, replace_colour):
     if (check_for_obstacle(data, node.position)):
         node.colour = 'black'
         floodGrid.insert(node)
-        # print('found an obstacle')
+        print('found an obstacle')
         return
+    else:
+        floodGrid.insert(node)
     if (target_colour == replace_colour):
         return  
     if (floodGrid.get_node_at(node.position.x, node.position.y).colour != target_colour):
@@ -256,9 +267,10 @@ def flood_fill_below(node, target_colour, replace_colour):
         return
     if (not check_for_obstacle(data, get_position_below(node.position))):
         southNode = FloodNode(get_position_below(node.position), 'green')
-        # print('southNode:')
-        # southNode.to_string()
+        print('southNode:')
+        southNode.to_string()
         floodGrid.insert(southNode)
+        # floodGrid.print_string()
         flood_fill_below(southNode, target_colour, replace_colour)
     return
 
@@ -340,29 +352,37 @@ def move():
     if not obstacle_flag['down']:
         possible_directions.append('down')
 
-    direction = get_direction_to_goal(my_snake_head, target_food)
+    food_direction = get_direction_to_goal(my_snake_head, target_food)
 
-    if (direction not in possible_directions):
-        if ('left' in possible_directions):
-            flood_fill_left(FloodNode(get_position_to_left(my_snake_head)), 'white', 'yellow')
-        if ('right' in possible_directions):
-            flood_fill_right(FloodNode(get_position_to_right(my_snake_head)), 'white', 'red')
-        if ('up' in possible_directions):
-            flood_fill_up(FloodNode(get_position_above(my_snake_head)), 'white', 'blue')
-        if ('down' in possible_directions):
-            flood_fill_below(FloodNode(get_position_below(my_snake_head)), 'white', 'green')
+    if ('left' in possible_directions):
+        flood_fill_left(FloodNode(get_position_to_left(my_snake_head)), 'white', 'yellow')
+    if ('right' in possible_directions):
+        flood_fill_right(FloodNode(get_position_to_right(my_snake_head)), 'white', 'red')
+    if ('up' in possible_directions):
+        flood_fill_up(FloodNode(get_position_above(my_snake_head)), 'white', 'blue')
+    if ('down' in possible_directions):
+        flood_fill_below(FloodNode(get_position_below(my_snake_head)), 'white', 'green')
 
-        flood_fill_values = [floodGrid.count_yellow(), 
+    flood_fill_values = [floodGrid.count_yellow(), 
                              floodGrid.count_red(),
                              floodGrid.count_blue(),
                              floodGrid.count_green()]
-        biggest_space = flood_fill_values.index(max(flood_fill_values))
-        direction = 'left' if biggest_space == 0 else 'right' if biggest_space == 1 else 'up' if biggest_space == 2 else 'down'
+    biggest_space = flood_fill_values.index(max(flood_fill_values))
+    ff_direction = 'left' if biggest_space == 0 else 'right' if biggest_space == 1 else 'up' if biggest_space == 2 else 'down'
+    floodGrid.print_string()
+    print(ff_direction)
 
-    attack_dir = check_for_potential_kill(my_snake_head)
-    if (attack_dir is not None and attack_dir in possible_directions):
-        direction = attack_dir
+    possible_attack = check_for_potential_kill(my_snake_head)
+    if (possible_attack is not None):
+        attack_direction = possible_attack
+        if (attack_direction in possible_directions):
+            direction = attack_direction
     #print(astar)
+
+    elif (food_direction in possible_directions):
+        direction = food_direction
+    else:
+        direction = ff_direction
 
     return move_response(direction)
 
@@ -371,9 +391,9 @@ def move():
 def end():
     global floodGrid
     data = bottle.request.json
-    # end_grid_file = open("Death_grid.txt", "w")
-    # end_grid_file.write(floodGrid.to_string())
-    # end_grid_file.close()
+    end_grid_file = open("Death_grid.txt", "w")
+    end_grid_file.write(floodGrid.to_string())
+    end_grid_file.close()
     """
     TODO: If your snake AI was stateful,
         clean up any stateful objects here.
