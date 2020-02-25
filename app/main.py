@@ -3,276 +3,12 @@ import os
 import random
 import bottle
 
-from api import ping_response, start_response, move_response, end_response
-from a_star import Position, GridPositionInfo#, AStarSearch
+from app.api import ping_response, start_response, move_response, end_response
+from app.a_star import Position, GridPositionInfo
+from app.helpers import *
+from app.flood_fill import *
+from app.head_on_collision import *
 
-class FloodNode:
-    def __init__(self, position, colour='white'):
-        self.position = position
-        self.colour = colour
-
-    # def to_string(self):
-    #     print('(' + str(self.position.x) + ',' + str(self.position.y) + ') - ' + self.colour)
-
-class FloodGrid:
-    def __init__(self, height, width):
-        self.height = height
-        self.width = width
-        self.grid = [[FloodNode(Position(x,y)) for x in range(width)] for y in range(height)]
-
-    def insert(self, node):
-        # if (node.position.x < 0 or node.position.x > self.width):
-        #     print('index out of range at x=' + str(node.position.x))
-        # if (node.position.y < 0 or node.position.y > self.height):
-        #     print('index out of range at y=' + str(node.position.y))
-        self.grid[node.position.x][node.position.y] = node
-
-    # def print_string(self):
-    #     for i in range(self.width):
-    #         for j in range(self.height):
-    #             node = self.grid[j][i]
-    #             print(node.colour, end=' ')
-    #         print()
-
-    # def to_string(self):
-    #     out_str = ''
-    #     for i in range(self.width):
-    #         for j in range(self.height):
-    #             node = self.grid[j][i]
-    #             out_str = out_str + node.colour + ' '
-    #         out_str = out_str + '\n'
-    #     return out_str
-
-    def get_node_at(self, x, y):
-        if (x >= 0 and x < self.width and y >= 0 and y < self.height):
-            return self.grid[y][x]
-        else:
-            # print('grid index out of range for ' + str(x) + ',' + str(y))
-            return
-
-    def count_red(self):
-        counter = 0
-        for i in range(self.width):
-            for j in range(self.height):
-                if (self.grid[i][j].colour == 'red'):
-                    counter = counter + 1
-        return counter
-
-    def count_blue(self):
-        counter = 0
-        for i in range(self.width):
-            for j in range(self.height):
-                if (self.grid[i][j].colour == 'blue'):
-                    counter = counter + 1
-        return counter
-
-    def count_yellow(self):
-        counter = 0
-        for i in range(self.width):
-            for j in range(self.height):
-                if (self.grid[i][j].colour == 'yellow'):
-                    counter = counter + 1
-        return counter
-
-    def count_green(self):
-        counter = 0
-        for i in range(self.width):
-            for j in range(self.height):
-                if (self.grid[i][j].colour == 'green'):
-                    counter = counter + 1
-        return counter
-
-    def count_white(self):
-        counter = 0
-        for i in range(self.width):
-            for j in range(self.height):
-                if (self.grid[i][j].colour == 'white'):
-                    counter = counter + 1
-        return counter
-
-def get_position_to_left(pos):
-    return Position(pos.x - 1, pos.y)
-
-def get_position_to_right(pos):
-    return Position(pos.x + 1, pos.y)
-
-def get_position_above(pos):
-    return Position(pos.x, pos.y - 1)
-
-def get_position_below(pos):
-    return Position(pos.x, pos.y + 1)
-
-def position_of_nearest_food(data, current):
-    min_crumb_dist = 999
-    for crumb in data['board']['food']:
-        crumb_dist = abs(crumb['x'] - current.x) + abs(crumb['y'] - current.y)
-        if min_crumb_dist > crumb_dist:
-            min_crumb_dist = crumb_dist
-            nearest_food = Position(crumb['x'], crumb['y'])
-    return nearest_food or None
-
-def get_direction_to_goal(current, goal):
-    if (current.x > goal.x):
-        return 'left'
-    elif (current.x < goal.x):
-        return 'right'
-    elif (current.y < goal.y):
-        return 'down'
-    elif (current.y > goal.y):
-        return 'up'
-
-# checks to see if the head of another snake is within 2 moves of my_snake_head
-# if so, determines if opponent snake is bigger/smaller than me
-# if opponent snake is smaller, will try to cause a head-on collision, thus killing opponent
-def check_for_potential_kill(my_snake_head):
-    global data 
-    for snake in data['board']['snakes']:
-        # we don't have to worry about our own head
-        if snake['id'] == data['you']['id']:
-            continue
-        else:
-            if (opponent_snake_head_nearby(my_snake_head, snake)):
-                if (i_am_bigger_than_opponent(snake)):
-                    return get_direction_to_goal(my_snake_head, Position(snake['body'][0]['x'], snake['body'][0]['y']))
-    return
-
-def opponent_snake_head_nearby(my_snake_head, snake):
-    if (get_manhattan_distance_between(my_snake_head, Position(snake['body'][0]['x'], snake['body'][0]['y'])) <= 2):
-        return True
-    else:
-        return False
-
-def get_manhattan_distance_between(a,b):
-    return abs(a.x - b.x) + abs(a.y - b.y)
-
-def i_am_bigger_than_opponent(snake):
-    global data
-    if ((1 + len(snake['body'])) < len(data['you']['body'])):
-        return True
-    else:
-        return False
-
-def check_for_obstacle(data, position):
-    walls = {
-        'up': -1,
-        'left': -1,
-        'down': data['board']['height'],
-        'right': data['board']['width']
-    }
-
-    for snake in data['board']['snakes']:
-        for piece in snake['body']:
-            if (piece['x'] == position.x and piece['y'] == position.y):
-                return True
-    
-    if walls['up'] == position.y or walls['down'] == position.y or walls['left'] == position.x or walls['right'] == position.x:
-        return True
-
-    return False
-
-def flood_fill_left(node, target_colour, replace_colour):
-    global floodGrid
-    if (floodGrid is None):
-        # print('error retrieving floodGrid')
-        return 
-    if (check_for_obstacle(data, node.position)):
-        node.colour = 'black'
-        floodGrid.insert(node)
-        print('found an obstacle')
-        return
-    else:
-        floodGrid.insert(node)
-    if (target_colour == replace_colour):
-        return  
-    if (floodGrid.get_node_at(node.position.x, node.position.y).colour != target_colour):
-        # print('node is not target colour')
-        return
-    if (not check_for_obstacle(data, get_position_to_left(node.position))):
-        westNode = FloodNode(get_position_to_left(node.position), 'yellow')
-        # print('westNode: ')
-        # westNode.to_string()
-        floodGrid.insert(westNode)
-        # floodGrid.print_string()
-        flood_fill_left(westNode, target_colour, replace_colour)
-    return
-
-def flood_fill_right(node, target_colour, replace_colour):
-    global floodGrid
-    if (floodGrid is None):
-        # print('error retrieving floodGrid')
-        return 
-    if (check_for_obstacle(data, node.position)):
-        node.colour = 'black'
-        floodGrid.insert(node)
-        print('found an obstacle')
-        return
-    else:
-        floodGrid.insert(node)
-    if (target_colour == replace_colour):
-        return  
-    if (floodGrid.get_node_at(node.position.x, node.position.y).colour != target_colour):
-        # print('node is not target colour')
-        return
-    if (not check_for_obstacle(data, get_position_to_right(node.position))):
-        eastNode = FloodNode(get_position_to_right(node.position), 'red')
-        # print('eastNode:')
-        # eastNode.to_string()
-        floodGrid.insert(eastNode)
-        # floodGrid.print_string()
-        flood_fill_right(eastNode, target_colour, replace_colour)
-    return
-
-def flood_fill_up(node, target_colour, replace_colour):
-    global floodGrid
-    if (floodGrid is None):
-        # print('error retrieving floodGrid')
-        return 
-    if (check_for_obstacle(data, node.position)):
-        node.colour = 'black'
-        floodGrid.insert(node)
-        print('found an obstacle')
-        return
-    else:
-        floodGrid.insert(node)
-    if (target_colour == replace_colour):
-        return  
-    if (floodGrid.get_node_at(node.position.x, node.position.y).colour != target_colour):
-        # print('node is not target colour')
-        return
-    if (not check_for_obstacle(data, get_position_above(node.position))):
-        northNode = FloodNode(get_position_above(node.position), 'blue')
-        # print('northNode:')
-        # northNode.to_string()
-        floodGrid.insert(northNode)
-        # floodGrid.print_string()
-        flood_fill_up(northNode, target_colour, replace_colour)
-    return
-
-def flood_fill_below(node, target_colour, replace_colour):
-    global floodGrid
-    if (floodGrid is None):
-        # print('error retrieving floodGrid')
-        return 
-    if (check_for_obstacle(data, node.position)):
-        node.colour = 'black'
-        floodGrid.insert(node)
-        print('found an obstacle')
-        return
-    else:
-        floodGrid.insert(node)
-    if (target_colour == replace_colour):
-        return  
-    if (floodGrid.get_node_at(node.position.x, node.position.y).colour != target_colour):
-        # print('node is not target colour')
-        return
-    if (not check_for_obstacle(data, get_position_below(node.position))):
-        southNode = FloodNode(get_position_below(node.position), 'green')
-        # print('southNode:')
-        # southNode.to_string()
-        floodGrid.insert(southNode)
-        # floodGrid.print_string()
-        flood_fill_below(southNode, target_colour, replace_colour)
-    return
 
 @bottle.route('/')
 def index():
@@ -318,8 +54,6 @@ def start():
 
 @bottle.post('/move')
 def move():
-    global floodGrid
-    global data
     data = bottle.request.json
 
     """
@@ -328,68 +62,37 @@ def move():
     """
     #print(json.dumps(data))
 
-    my_snake_head = Position(data['you']['body'][0]['x'], data['you']['body'][0]['y'])
-    food = Position(data['board']['food'][0]['x'], data['board']['food'][0]['y'])
-    #astar = AStarSearch(data['board']['height'], my_snake_head, food)
-    floodGrid = FloodGrid(data['board']['width'], data['board']['height'])
+    floodGrid = FloodGrid(data)
+    my_snake_head = get_my_head_pos()
 
-    obstacle_flag = {
-        'up': check_for_obstacle(data, get_position_above(my_snake_head)),
-        'right': check_for_obstacle(data, get_position_to_right(my_snake_head)),
-        'down': check_for_obstacle(data, get_position_below(my_snake_head)),
-        'left': check_for_obstacle(data, get_position_to_left(my_snake_head))
-    }
 
-    target_food = position_of_nearest_food(data, my_snake_head)
+    target_food = position_of_nearest_food(data)
+    food_directions = get_directions_to_goal(my_snake_head, target_food)
 
-    possible_directions = []
-    if not obstacle_flag['up']:
-        possible_directions.append('up')
-    if not obstacle_flag['right']:
-        possible_directions.append('right')
-    if not obstacle_flag['left']:
-        possible_directions.append('left')
-    if not obstacle_flag['down']:
-        possible_directions.append('down')
-
-    food_direction = get_direction_to_goal(my_snake_head, target_food)
-
+    collision_moves = get_moves_if_collision_possible(data)
+    
+    possible_directions = get_possible_directions()
     if ('left' in possible_directions):
-        flood_fill_left(FloodNode(get_position_to_left(my_snake_head)), 'white', 'yellow')
+        floodGrid.flood_fill_left(FloodNode(get_position_to_left(my_snake_head)), 'white', 'yellow')
     if ('right' in possible_directions):
-        flood_fill_right(FloodNode(get_position_to_right(my_snake_head)), 'white', 'red')
+        floodGrid.flood_fill_right(FloodNode(get_position_to_right(my_snake_head)), 'white', 'red')
     if ('up' in possible_directions):
-        flood_fill_up(FloodNode(get_position_above(my_snake_head)), 'white', 'blue')
+        floodGrid.flood_fill_up(FloodNode(get_position_above(my_snake_head)), 'white', 'blue')
     if ('down' in possible_directions):
-        flood_fill_below(FloodNode(get_position_below(my_snake_head)), 'white', 'green')
+        floodGrid.flood_fill_below(FloodNode(get_position_below(my_snake_head)), 'white', 'green')
 
-    flood_fill_values = [floodGrid.count_yellow(), 
-                             floodGrid.count_red(),
-                             floodGrid.count_blue(),
-                             floodGrid.count_green()]
-    biggest_space = flood_fill_values.index(max(flood_fill_values))
-    ff_direction = 'left' if biggest_space == 0 else 'right' if biggest_space == 1 else 'up' if biggest_space == 2 else 'down'
-    # floodGrid.print_string()
-    print(ff_direction)
-
-    possible_attack = check_for_potential_kill(my_snake_head)
-    if (possible_attack is not None):
-        attack_direction = possible_attack
-        if (attack_direction in possible_directions):
-            direction = attack_direction
-    #print(astar)
-
-    elif (food_direction in possible_directions):
-        direction = food_direction
+    if (collision_moves is not None):
+        direction = collision_moves[0]
+    elif (data['you']['health'] < 40):
+        direction = food_directions[random.randint(0, len(food_directions) - 1)]
     else:
-        direction = ff_direction
+        direction = floodGrid.get_direction_of_biggest_space()
 
     return move_response(direction)
 
 
 @bottle.post('/end')
 def end():
-    global floodGrid
     data = bottle.request.json
     # end_grid_file = open("Death_grid.txt", "w")
     # end_grid_file.write(floodGrid.to_string())
