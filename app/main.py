@@ -3,11 +3,11 @@ import os
 import random
 import bottle
 
-from app.api import ping_response, start_response, move_response, end_response
-from app.a_star import Position, GridPositionInfo
-from app.helpers import *
-from app.flood_fill import *
-from app.head_on_collision import *
+from api import ping_response, start_response, move_response, end_response
+from a_star import Position, GridPositionInfo
+from helpers import *
+from flood_fill import *
+from head_on_collision import *
 
 
 @bottle.route('/')
@@ -63,7 +63,7 @@ def move():
     #print(json.dumps(data))
 
     floodGrid = FloodGrid(data)
-    my_snake_head = get_my_head_pos()
+    my_snake_head = get_my_head_pos(data)
 
 
     target_food = position_of_nearest_food(data)
@@ -71,7 +71,7 @@ def move():
 
     collision_moves = get_moves_if_collision_possible(data)
     
-    possible_directions = get_possible_directions()
+    possible_directions = get_possible_directions(data)
     if ('left' in possible_directions):
         floodGrid.flood_fill_left(FloodNode(get_position_to_left(my_snake_head)), 'white', 'yellow')
     if ('right' in possible_directions):
@@ -83,10 +83,14 @@ def move():
 
     if (collision_moves is not None):
         direction = collision_moves[0]
-    elif (data['you']['health'] < 40):
-        direction = food_directions[random.randint(0, len(food_directions) - 1)]
     else:
-        direction = floodGrid.get_direction_of_biggest_space()
+        directions = list.copy(food_directions)
+        directions.append(floodGrid.get_direction_of_biggest_space())
+        print(directions)
+        direction = directions[random.randint(0, len(directions) - 1)]
+        while (direction not in possible_directions):
+            direction = directions[random.randint(0, len(directions) - 1)]
+        print(direction)
 
     return move_response(direction)
 

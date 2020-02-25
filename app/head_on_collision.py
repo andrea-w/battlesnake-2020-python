@@ -1,9 +1,9 @@
-from app.a_star import Position
-from app.helpers import *
+from a_star import Position
+from helpers import *
 
 def get_moves_if_collision_possible(data):
     my_id = data['you']['id']
-    my_head_pos = Position(data['you']['body'][0])
+    my_head_pos = Position(data['you']['body'][0]['x'], data['you']['body'][0]['y'])
     for snake in data['board']['snakes']:
         if snake['id'] != my_id:
             snake_head_pos = Position(snake['body'][0])

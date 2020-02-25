@@ -1,5 +1,5 @@
-from app.a_star import Position
-from app.helpers import *
+from a_star import Position
+from helpers import *
 
 class FloodNode:
     def __init__(self, position, colour='white'):
@@ -13,7 +13,7 @@ class FloodGrid:
     def __init__(self, data):
         self.height = data['board']['height']
         self.width = data['board']['width']
-        self.grid = [[FloodNode(Position(x,y)) for x in range(width)] for y in range(height)]
+        self.grid = [[FloodNode(Position(x,y)) for x in range(self.width)] for y in range(self.height)]
         self.data = data
 
     def insert(self, node):
@@ -96,7 +96,7 @@ class FloodGrid:
         return ff_direction
 
     def flood_fill_left(self, node, target_colour, replace_colour):
-        if (check_for_obstacle(data, node.position)):
+        if (check_for_obstacle(self.data, node.position)):
             node.colour = 'black'
             self.insert(node)
             print('found an obstacle')
@@ -108,14 +108,14 @@ class FloodGrid:
         if (self.get_node_at(node.position.x, node.position.y).colour != target_colour):
             print('node is not target colour')
             return
-        if (not check_for_obstacle(data, get_position_to_left(node.position))):
+        if (not check_for_obstacle(self.data, get_position_to_left(node.position))):
             westNode = FloodNode(get_position_to_left(node.position), 'yellow')
             self.insert(westNode)
-            flood_fill_left(westNode, target_colour, replace_colour)
+            self.flood_fill_left(westNode, target_colour, replace_colour)
         return
 
     def flood_fill_right(self, node, target_colour, replace_colour):
-        if (check_for_obstacle(data, node.position)):
+        if (check_for_obstacle(self.data, node.position)):
             node.colour = 'black'
             self.insert(node)
             return
@@ -125,14 +125,14 @@ class FloodGrid:
             return
         if (self.get_node_at(node.position.x, node.position.y).colour != target_colour):
             return
-        if (not check_for_obstacle(data, get_position_to_right(node.position))):
+        if (not check_for_obstacle(self.data, get_position_to_right(node.position))):
             eastNode = FloodNode(get_position_to_right(node.position), 'red')
             self.insert(eastNode)
-            flood_fill_right(eastNode, target_colour, replace_colour)
+            self.flood_fill_right(eastNode, target_colour, replace_colour)
         return
 
     def flood_fill_up(self, node, target_colour, replace_colour):
-        if (check_for_obstacle(data, node.position)):
+        if (check_for_obstacle(self.data, node.position)):
             node.colour = 'black'
             self.insert(node)
             return
@@ -142,14 +142,14 @@ class FloodGrid:
             return
         if (self.get_node_at(node.position.x, node.position.y).colour != target_colour):
             return
-        if (not check_for_obstacle(data, get_position_above(node.position))):
+        if (not check_for_obstacle(self.data, get_position_above(node.position))):
             northNode = FloodNode(get_position_above(node.position), 'blue')
             self.insert(northNode)
-            flood_fill_up(northNode, target_colour, replace_colour)
+            self.flood_fill_up(northNode, target_colour, replace_colour)
         return
 
     def flood_fill_below(self, node, target_colour, replace_colour):
-        if (check_for_obstacle(data, node.position)):
+        if (check_for_obstacle(self.data, node.position)):
             node.colour = 'black'
             self.insert(node)
             return
@@ -159,8 +159,8 @@ class FloodGrid:
             return
         if (self.get_node_at(node.position.x, node.position.y).colour != target_colour):
             return
-        if (not check_for_obstacle(data, get_position_below(node.position))):
+        if (not check_for_obstacle(self.data, get_position_below(node.position))):
             southNode = FloodNode(get_position_below(node.position), 'green')
             self.insert(southNode)
-            flood_fill_below(southNode, target_colour, replace_colour)
+            self.flood_fill_below(southNode, target_colour, replace_colour)
         return

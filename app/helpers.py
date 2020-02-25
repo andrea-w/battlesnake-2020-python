@@ -1,4 +1,4 @@
-from app.a_star import Position
+from a_star import Position
 
 def get_position_to_left(pos):
     return Position(pos.x - 1, pos.y)
@@ -23,13 +23,13 @@ def get_position_for_move_command(move, current_pos):
         return get_position_below(current_pos)
 
 def position_of_nearest_food(data):
-    my_snake_head = get_my_head_pos()
+    my_snake_head = get_my_head_pos(data)
     min_crumb_dist = 999
     for crumb in data['board']['food']:
-        crumb_dist = get_manhattan_distance_between(crumb, my_snake_head)
+        crumb_dist = get_manhattan_distance_between(Position(crumb['x'], crumb['y']), my_snake_head)
         if min_crumb_dist > crumb_dist:
             min_crumb_dist = crumb_dist
-            nearest_food = Position(crumb)
+            nearest_food = Position(crumb['x'], crumb['y'])
     return nearest_food or None
 
 def get_directions_to_goal(current, goal):
