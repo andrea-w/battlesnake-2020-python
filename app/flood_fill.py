@@ -6,8 +6,8 @@ class FloodNode:
         self.position = position
         self.colour = colour
 
-    def to_string(self):
-        print('(' + str(self.position.x) + ',' + str(self.position.y) + ') - ' + self.colour)
+    # def to_string(self):
+    #     print('(' + str(self.position.x) + ',' + str(self.position.y) + ') - ' + self.colour)
 
 class FloodGrid:
     def __init__(self, data):
@@ -17,33 +17,33 @@ class FloodGrid:
         self.data = data
 
     def insert(self, node):
-        if (node.position.x < 0 or node.position.x > self.width):
-            print('index out of range at x=' + str(node.position.x))
-        if (node.position.y < 0 or node.position.y > self.height):
-            print('index out of range at y=' + str(node.position.y))
+        # if (node.position.x < 0 or node.position.x > self.width):
+        #     print('index out of range at x=' + str(node.position.x))
+        # if (node.position.y < 0 or node.position.y > self.height):
+        #     print('index out of range at y=' + str(node.position.y))
         self.grid[node.position.x][node.position.y] = node
 
-    def print_string(self):
-        for i in range(self.width):
-            for j in range(self.height):
-                node = self.grid[j][i]
-                print(node.colour, end=' ')
-            print()
+    # def print_string(self):
+    #     for i in range(self.width):
+    #         for j in range(self.height):
+    #             node = self.grid[j][i]
+    #             print(node.colour, end=' ')
+    #         print()
 
-    def to_string(self):
-        out_str = ''
-        for i in range(self.width):
-            for j in range(self.height):
-                node = self.grid[j][i]
-                out_str = out_str + node.colour + ' '
-            out_str = out_str + '\n'
-        return out_str
+    # def to_string(self):
+    #     out_str = ''
+    #     for i in range(self.width):
+    #         for j in range(self.height):
+    #             node = self.grid[j][i]
+    #             out_str = out_str + node.colour + ' '
+    #         out_str = out_str + '\n'
+    #     return out_str
 
     def get_node_at(self, x, y):
         if (x >= 0 and x < self.width and y >= 0 and y < self.height):
             return self.grid[y][x]
         else:
-            print('grid index out of range for ' + str(x) + ',' + str(y))
+            # print('grid index out of range for ' + str(x) + ',' + str(y))
             return
 
     def count_red(self):
@@ -99,14 +99,12 @@ class FloodGrid:
         if (check_for_obstacle(self.data, node.position)):
             node.colour = 'black'
             self.insert(node)
-            print('found an obstacle')
             return
         else:
             self.insert(node)
         if (target_colour == replace_colour):
             return
         if (self.get_node_at(node.position.x, node.position.y).colour != target_colour):
-            print('node is not target colour')
             return
         if (not check_for_obstacle(self.data, get_position_to_left(node.position))):
             westNode = FloodNode(get_position_to_left(node.position), 'yellow')
