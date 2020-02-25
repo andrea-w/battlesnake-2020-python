@@ -6,7 +6,7 @@ def get_moves_if_collision_possible(data):
     my_head_pos = Position(data['you']['body'][0]['x'], data['you']['body'][0]['y'])
     for snake in data['board']['snakes']:
         if snake['id'] != my_id:
-            snake_head_pos = Position(snake['body'][0])
+            snake_head_pos = Position(snake['body'][0]['x'], snake['body'][0]['y'])
             if (get_manhattan_distance(my_head_pos, snake_head_pos) <= 2):
                 return optimal_moves(data, snake)
     return None
