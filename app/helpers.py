@@ -44,9 +44,9 @@ def get_directions_to_goal(current, goal):
         directions.append('up')
     return directions
 
-def get_directions_away_from(current, avoid):
+def get_directions_away_from(current, avoid, data):
     distance = get_manhattan_distance_between(current, avoid)
-    possible_directions = get_possible_directions()
+    possible_directions = get_possible_directions(data)
     # iterate through possible_directions; remove away that decrease manhattan distance between us and opponent
     for dir in possible_directions:
         pos = get_position_for_move_command(dir, current)
