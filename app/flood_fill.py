@@ -15,6 +15,10 @@ class FloodGrid:
         self.width = data['board']['width']
         self.grid = [[FloodNode(Position(x,y)) for x in range(self.width)] for y in range(self.height)]
         self.data = data
+        self.blue_count = 0
+        self.green_count = 0
+        self.yellow_count = 0
+        self.red_count = 0
 
     def insert(self, node):
         # if (node.position.x < 0 or node.position.x > self.width):
@@ -30,14 +34,14 @@ class FloodGrid:
     #             print(node.colour, end=' ')
     #         print()
 
-    # def to_string(self):
-    #     out_str = ''
-    #     for i in range(self.width):
-    #         for j in range(self.height):
-    #             node = self.grid[j][i]
-    #             out_str = out_str + node.colour + ' '
-    #         out_str = out_str + '\n'
-    #     return out_str
+    def to_string(self):
+        out_str = ''
+        for i in range(self.width):
+            for j in range(self.height):
+                node = self.grid[j][i]
+                out_str = out_str + node.colour + ' '
+            out_str = out_str + '\n'
+        return out_str
 
     def get_node_at(self, x, y):
         if (x >= 0 and x < self.width and y >= 0 and y < self.height):
@@ -46,119 +50,96 @@ class FloodGrid:
             # print('grid index out of range for ' + str(x) + ',' + str(y))
             return
 
-    def count_red(self):
-        counter = 0
-        for i in range(self.width):
-            for j in range(self.height):
-                if (self.grid[i][j].colour == 'red'):
-                    counter = counter + 1
-        return counter
-
-    def count_blue(self):
-        counter = 0
-        for i in range(self.width):
-            for j in range(self.height):
-                if (self.grid[i][j].colour == 'blue'):
-                    counter = counter + 1
-        return counter
-
-    def count_yellow(self):
-        counter = 0
-        for i in range(self.width):
-            for j in range(self.height):
-                if (self.grid[i][j].colour == 'yellow'):
-                    counter = counter + 1
-        return counter
-
-    def count_green(self):
-        counter = 0
-        for i in range(self.width):
-            for j in range(self.height):
-                if (self.grid[i][j].colour == 'green'):
-                    counter = counter + 1
-        return counter
-
-    def count_white(self):
-        counter = 0
-        for i in range(self.width):
-            for j in range(self.height):
-                if (self.grid[i][j].colour == 'white'):
-                    counter = counter + 1
-        return counter
-
     def get_direction_of_biggest_space(self):
-        flood_fill_values = [self.count_yellow(), 
-                             self.count_red(),
-                             self.count_blue(),
-                             self.count_green()]
+        flood_fill_values = [self.yellow_count, 
+                             self.red_count,
+                             self.blue_count,
+                             self.green_count]
         biggest_space = flood_fill_values.index(max(flood_fill_values))
         ff_direction = 'left' if biggest_space == 0 else 'right' if biggest_space == 1 else 'up' if biggest_space == 2 else 'down'
         return ff_direction
 
-    def flood_fill_left(self, node, target_colour, replace_colour):
+    def flood_fill_left(self, node):
         if (check_for_obstacle(self.data, node.position)):
             node.colour = 'black'
             self.insert(node)
             return
         else:
+            node.colour = 'yellow'
             self.insert(node)
-        if (target_colour == replace_colour):
-            return
-        if (self.get_node_at(node.position.x, node.position.y).colour != target_colour):
-            return
-        if (not check_for_obstacle(self.data, get_position_to_left(node.position))):
-            westNode = FloodNode(get_position_to_left(node.position), 'yellow')
-            self.insert(westNode)
-            self.flood_fill_left(westNode, target_colour, replace_colour)
+            self.yellow_count = self.flood_fill(node, 'yellow', 1)    
         return
 
-    def flood_fill_right(self, node, target_colour, replace_colour):
+    def flood_fill_right(self, node):
         if (check_for_obstacle(self.data, node.position)):
             node.colour = 'black'
             self.insert(node)
             return
         else:
+            node.colour = 'red'
             self.insert(node)
-        if (target_colour == replace_colour):
-            return
-        if (self.get_node_at(node.position.x, node.position.y).colour != target_colour):
-            return
-        if (not check_for_obstacle(self.data, get_position_to_right(node.position))):
-            eastNode = FloodNode(get_position_to_right(node.position), 'red')
-            self.insert(eastNode)
-            self.flood_fill_right(eastNode, target_colour, replace_colour)
+            self.red_count = self.flood_fill(node, 'red', 1)
         return
 
-    def flood_fill_up(self, node, target_colour, replace_colour):
+    def flood_fill_up(self, node):
         if (check_for_obstacle(self.data, node.position)):
             node.colour = 'black'
             self.insert(node)
             return
         else:
+            node.colour = 'blue'
             self.insert(node)
-        if (target_colour == replace_colour):
-            return
-        if (self.get_node_at(node.position.x, node.position.y).colour != target_colour):
-            return
-        if (not check_for_obstacle(self.data, get_position_above(node.position))):
-            northNode = FloodNode(get_position_above(node.position), 'blue')
-            self.insert(northNode)
-            self.flood_fill_up(northNode, target_colour, replace_colour)
+            self.blue_count = self.flood_fill(node, 'blue', 1)
         return
 
-    def flood_fill_below(self, node, target_colour, replace_colour):
+    def flood_fill_below(self, node):
         if (check_for_obstacle(self.data, node.position)):
             node.colour = 'black'
             self.insert(node)
             return
         else:
+            node.colour = 'green'
             self.insert(node)
-        if (target_colour == replace_colour):
-            return
-        if (self.get_node_at(node.position.x, node.position.y).colour != target_colour):
-            return
-        if (not check_for_obstacle(self.data, get_position_below(node.position))):
-            southNode = FloodNode(get_position_below(node.position), 'green')
-            self.insert(southNode)
-            self.flood_fill_below(southNode, target_colour, replace_colour)
+            self.green_count = self.flood_fill(node, 'green', 1)
         return
+
+    # the 'node' given as parameter has already been inserted into the grid
+    def flood_fill(self, node, replace_colour, counter):
+        left_pos = get_position_to_left(node.position)
+        right_pos = get_position_to_right(node.position)
+        up_pos = get_position_above(node.position)
+        below_pos = get_position_below(node.position)
+
+        westNode = self.get_node_at(left_pos.x, left_pos.y)
+        if (westNode is not None):
+            counter += self.flood_fill_node(westNode, replace_colour, 0)
+
+        northNode = self.get_node_at(up_pos.x, up_pos.y)
+        if (northNode is not None):
+            counter += self.flood_fill_node(northNode, replace_colour, 0)
+
+        eastNode = self.get_node_at(right_pos.x, right_pos.y)
+        if (eastNode is not None):
+            counter += self.flood_fill_node(eastNode, replace_colour, 0)
+
+        southNode = self.get_node_at(below_pos.x, below_pos.y)
+        if (southNode is not None):
+            counter += self.flood_fill_node(southNode, replace_colour, 0)
+
+        return counter
+
+    def flood_fill_node(self, node, replace_colour, counter):
+        if (node.colour == 'white' and not check_for_obstacle(self.data, node.position)):
+            node.colour = replace_colour
+            counter += 1
+        elif (node.colour == 'white'):  # there must have been an obstacle
+            node.colour = 'black'
+            return counter
+        elif (node.colour == 'black'):
+            return counter
+        elif (node.colour != replace_colour): # this space has already been visited from another direction
+            node.colour = replace_colour
+            counter += 1
+        self.insert(node)
+        # self.flood_fill(node, replace_colour, counter)
+        return counter

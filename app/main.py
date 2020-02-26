@@ -61,7 +61,7 @@ def move():
             snake AI must choose a direction to move in.
     """
     #print(json.dumps(data))
-
+    global floodGrid
     floodGrid = FloodGrid(data)
     my_snake_head = get_my_head_pos(data)
 
@@ -72,14 +72,26 @@ def move():
     collision_moves = get_moves_if_collision_possible(data)
     
     possible_directions = get_possible_directions(data)
-    if ('left' in possible_directions):
-        floodGrid.flood_fill_left(FloodNode(get_position_to_left(my_snake_head)), 'white', 'yellow')
-    if ('right' in possible_directions):
-        floodGrid.flood_fill_right(FloodNode(get_position_to_right(my_snake_head)), 'white', 'red')
-    if ('up' in possible_directions):
-        floodGrid.flood_fill_up(FloodNode(get_position_above(my_snake_head)), 'white', 'blue')
-    if ('down' in possible_directions):
-        floodGrid.flood_fill_below(FloodNode(get_position_below(my_snake_head)), 'white', 'green')
+
+    left_pos = get_position_to_left(my_snake_head)
+    leftNode = floodGrid.get_node_at(left_pos.x, left_pos.y)
+    if (leftNode is not None):
+        floodGrid.flood_fill_left(leftNode)
+
+    right_pos = get_position_to_right(my_snake_head)
+    rightNode = floodGrid.get_node_at(right_pos.x, right_pos.y)
+    if (rightNode is not None):
+        floodGrid.flood_fill_right(rightNode)
+
+    above_pos = get_position_above(my_snake_head)
+    aboveNode = floodGrid.get_node_at(above_pos.x, above_pos.y)
+    if (aboveNode is not None):
+        floodGrid.flood_fill_up(aboveNode)
+
+    below_pos = get_position_below(my_snake_head)
+    belowNode = floodGrid.get_node_at(below_pos.x, below_pos.y)
+    if (belowNode is not None):
+        floodGrid.flood_fill_below(belowNode)
 
     if (collision_moves is not None):
         direction = collision_moves[0]
@@ -105,7 +117,7 @@ def end():
     TODO: If your snake AI was stateful,
         clean up any stateful objects here.
     """
-    # print(json.dumps(data))
+    print(json.dumps(data))
 
     return end_response()
 
