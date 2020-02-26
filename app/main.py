@@ -84,7 +84,7 @@ def move():
     if (collision_moves is not None):
         direction = collision_moves[0]
     else:
-        directions = food_directions.copy()
+        directions = food_directions
         directions.append(floodGrid.get_direction_of_biggest_space())
         print(directions)
         direction = directions[random.randint(0, len(directions) - 1)]
