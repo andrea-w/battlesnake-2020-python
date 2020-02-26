@@ -49,7 +49,7 @@ def start():
     """
     #print(json.dumps(data))
 
-    return start_response("#33BEFF", "bwc-scarf", "bwc-ice-skate")
+    return start_response("#33BEFF", "silly", "curled")
 
 
 @bottle.post('/move')
